@@ -2,110 +2,82 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Hogwarts Mafia Online</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dziedzictwo Smoka: Mafia</title>
     <style>
+        :root {
+            --gold: #d4af37;
+            --dragon-blood: #8b0000;
+            --magic-blue: #00d4ff;
+        }
         body { 
-            background: #1a1a2e; 
-            color: #e94560; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            text-align: center; 
+            background: radial-gradient(circle, #1a1a2e 0%, #0f0f1a 100%);
+            color: white;
+            font-family: 'Cinzel', serif; /* Możesz dodać Google Fonts */
+            text-align: center;
             margin: 0;
-            padding: 20px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
         }
-        h1 { margin-bottom: 10px; text-shadow: 0 0 10px rgba(233, 69, 96, 0.5); }
-        .card { 
-            border: 2px solid #e94560; 
-            padding: 30px; 
-            margin: 20px auto; 
-            width: 80%;
-            max-width: 300px; 
-            border-radius: 20px; 
-            background: #16213e; 
-            box-shadow: 0 0 30px rgba(233, 69, 96, 0.3); 
+        .dragon-frame {
+            border: 3px solid var(--gold);
+            padding: 40px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 50px var(--dragon-blood);
+            max-width: 90%;
+            position: relative;
         }
-        #role { font-size: 1.8em; margin: 15px 0; color: #fff; min-height: 1.5em; }
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            background: #555;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
+        h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 5px; }
+        #role-box { 
+            font-size: 2.5em; 
+            margin: 20px 0; 
+            min-height: 80px;
+            text-shadow: 0 0 20px var(--magic-blue);
         }
-        .connected { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
-        button { 
-            background: #e94560; 
-            color: white; 
-            border: none; 
-            padding: 15px 40px; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            font-weight: bold; 
+        button {
+            background: var(--dragon-blood);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 15px 30px;
             font-size: 1.2em;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.2s;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: 0.3s;
         }
-        button:active { transform: scale(0.95); background: #c62a48; }
+        button:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--gold); }
+        .aura { position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border: 1px solid var(--magic-blue); opacity: 0.3; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.1; } 50% { opacity: 0.5; } 100% { opacity: 0.1; } }
     </style>
 </head>
 <body>
-    <h1>Hogwarts Mafia</h1>
-    
-    <div>
-        <span id="status-dot" class="status-dot"></span>
-        <small id="status-text">Łączenie z magią...</small>
+    <div class="dragon-frame">
+        <div class="aura"></div>
+        <h1>Studio Skawina</h1>
+        <p>Dotknij Khaela, by poznać swoje przeznaczenie...</p>
+        <div id="role-box">???</div>
+        <button onclick="revealRole()">KRONA-VIELLE!</button>
     </div>
 
-    <div class="card">
-        <h3>Twoja Rola:</h3>
-        <h2 id="role">---</h2>
-    </div>
-
-    <button onclick="startGame()">TIARA PRZYDZIAŁU</button>
-
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Automatyczne wykrywanie adresu serwera (ważne dla wersji online!)
         const socket = io();
-        
-        const roleText = document.getElementById('role');
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
+        const roleBox = document.getElementById('role-box');
 
-        // Obsługa połączenia
-        socket.on('connect', () => {
-            statusDot.classList.add('connected');
-            statusText.innerText = "Połączono ze Studio Skawina";
-            console.log("Połączono!");
-        });
-
-        socket.on('disconnect', () => {
-            statusDot.classList.remove('connected');
-            statusText.innerText = "Stracono połączenie...";
-        });
-
-        function startGame() {
+        function revealRole() {
+            roleBox.innerText = "Zaklinanie...";
             socket.emit('start-game');
         }
 
         socket.on('assign-role', (role) => {
-            roleText.innerText = role;
-            
-            // Smocza zmiana barw dla mafii
-            if(role.includes('Smierciozerca')) {
-                document.body.style.background = "#2b0505";
-                document.querySelector('.card').style.borderColor = "#ff0000";
-                document.querySelector('.card').style.boxShadow = "0 0 30px rgba(255, 0, 0, 0.4)";
-            } else {
-                document.body.style.background = "#1a1a2e";
-                document.querySelector('.card').style.borderColor = "#e94560";
-            }
+            // Efekt "smoczego ognia" przy otrzymaniu roli
+            roleBox.style.color = role.includes('Smierciozerca') ? 'red' : '#00d4ff';
+            roleBox.innerText = role;
         });
     </script>
 </body>
