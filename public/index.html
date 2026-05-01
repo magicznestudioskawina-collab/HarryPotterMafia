@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Hogwarts Mafia Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            background: #1a1a2e; 
+            color: #e94560; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 { margin-bottom: 10px; text-shadow: 0 0 10px rgba(233, 69, 96, 0.5); }
+        .card { 
+            border: 2px solid #e94560; 
+            padding: 30px; 
+            margin: 20px auto; 
+            width: 80%;
+            max-width: 300px; 
+            border-radius: 20px; 
+            background: #16213e; 
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.3); 
+        }
+        #role { font-size: 1.8em; margin: 15px 0; color: #fff; min-height: 1.5em; }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #555;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .connected { background: #00ff00; box-shadow: 0 0 8px #00ff00; }
+        button { 
+            background: #e94560; 
+            color: white; 
+            border: none; 
+            padding: 15px 40px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        button:active { transform: scale(0.95); background: #c62a48; }
+    </style>
+</head>
+<body>
+    <h1>Hogwarts Mafia</h1>
+    
+    <div>
+        <span id="status-dot" class="status-dot"></span>
+        <small id="status-text">Łączenie z magią...</small>
+    </div>
+
+    <div class="card">
+        <h3>Twoja Rola:</h3>
+        <h2 id="role">---</h2>
+    </div>
+
+    <button onclick="startGame()">TIARA PRZYDZIAŁU</button>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        // Automatyczne wykrywanie adresu serwera (ważne dla wersji online!)
+        const socket = io();
+        
+        const roleText = document.getElementById('role');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        // Obsługa połączenia
+        socket.on('connect', () => {
+            statusDot.classList.add('connected');
+            statusText.innerText = "Połączono ze Studio Skawina";
+            console.log("Połączono!");
+        });
+
+        socket.on('disconnect', () => {
+            statusDot.classList.remove('connected');
+            statusText.innerText = "Stracono połączenie...";
+        });
+
+        function startGame() {
+            socket.emit('start-game');
+        }
+
+        socket.on('assign-role', (role) => {
+            roleText.innerText = role;
+            
+            // Smocza zmiana barw dla mafii
+            if(role.includes('Smierciozerca')) {
+                document.body.style.background = "#2b0505";
+                document.querySelector('.card').style.borderColor = "#ff0000";
+                document.querySelector('.card').style.boxShadow = "0 0 30px rgba(255, 0, 0, 0.4)";
+            } else {
+                document.body.style.background = "#1a1a2e";
+                document.querySelector('.card').style.borderColor = "#e94560";
+            }
+        });
+    </script>
+</body>
+</html>
