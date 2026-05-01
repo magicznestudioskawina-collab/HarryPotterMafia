@@ -2,82 +2,33 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <title>Hogwarts Mafia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dziedzictwo Smoka: Mafia</title>
     <style>
-        :root {
-            --gold: #d4af37;
-            --dragon-blood: #8b0000;
-            --magic-blue: #00d4ff;
-        }
-        body { 
-            background: radial-gradient(circle, #1a1a2e 0%, #0f0f1a 100%);
-            color: white;
-            font-family: 'Cinzel', serif; /* Możesz dodać Google Fonts */
-            text-align: center;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        .dragon-frame {
-            border: 3px solid var(--gold);
-            padding: 40px;
-            border-radius: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            box-shadow: 0 0 50px var(--dragon-blood);
-            max-width: 90%;
-            position: relative;
-        }
-        h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 5px; }
-        #role-box { 
-            font-size: 2.5em; 
-            margin: 20px 0; 
-            min-height: 80px;
-            text-shadow: 0 0 20px var(--magic-blue);
-        }
-        button {
-            background: var(--dragon-blood);
-            color: var(--gold);
-            border: 2px solid var(--gold);
-            padding: 15px 30px;
-            font-size: 1.2em;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        button:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--gold); }
-        .aura { position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border: 1px solid var(--magic-blue); opacity: 0.3; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.1; } 50% { opacity: 0.5; } 100% { opacity: 0.1; } }
+        body { background: #1a1a2e; color: #e94560; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
+        .card { border: 2px solid #e94560; padding: 30px; margin: 40px auto; max-width: 300px; border-radius: 20px; background: #16213e; box-shadow: 0 0 20px rgba(233, 69, 96, 0.4); }
+        button { background: #e94560; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.2em; }
     </style>
 </head>
 <body>
-    <div class="dragon-frame">
-        <div class="aura"></div>
-        <h1>Studio Skawina</h1>
-        <p>Dotknij Khaela, by poznać swoje przeznaczenie...</p>
-        <div id="role-box">???</div>
-        <button onclick="revealRole()">KRONA-VIELLE!</button>
+    <h1>Hogwarts Mafia</h1>
+    <div class="card">
+        <h3>Twoja Rola:</h3>
+        <h2 id="role">Oczekiwanie...</h2>
     </div>
+    <button onclick="startGame()">TIARA PRZYDZIAŁU</button>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        const socket = io();
-        const roleBox = document.getElementById('role-box');
+        const socket = io(); // Na Renderze to automatycznie znajdzie serwer
+        const roleText = document.getElementById('role');
 
-        function revealRole() {
-            roleBox.innerText = "Zaklinanie...";
+        function startGame() {
             socket.emit('start-game');
         }
 
         socket.on('assign-role', (role) => {
-            // Efekt "smoczego ognia" przy otrzymaniu roli
-            roleBox.style.color = role.includes('Smierciozerca') ? 'red' : '#00d4ff';
-            roleBox.innerText = role;
+            roleText.innerText = role;
         });
     </script>
 </body>
