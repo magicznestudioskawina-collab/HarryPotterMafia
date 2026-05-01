@@ -2,26 +2,99 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Hogwarts Mafia</title>
+    <title>Hogwarts Mafia - Studio Skawina</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #1a1a2e; color: #e94560; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
-        .card { border: 2px solid #e94560; padding: 30px; margin: 40px auto; max-width: 300px; border-radius: 20px; background: #16213e; box-shadow: 0 0 20px rgba(233, 69, 96, 0.4); }
-        button { background: #e94560; color: white; border: none; padding: 15px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.2em; }
+        /* Tło z zamkiem Hogwart */
+        body { 
+            background: linear-gradient(rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.8)), 
+                        url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1000') no-repeat center center fixed; 
+            background-size: cover;
+            color: #f0e68c; 
+            font-family: 'Cinzel', serif; 
+            text-align: center; 
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { 
+            font-size: 2.5em; 
+            text-shadow: 2px 2px 10px #000;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        /* Stylizowana karta jak pergamin */
+        .card { 
+            background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+            background-color: #f4e4bc;
+            border: 8px double #4a3728; 
+            padding: 30px; 
+            margin: 30px auto; 
+            max-width: 320px; 
+            border-radius: 10px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            color: #2b1e16;
+            transition: all 0.5s ease;
+        }
+
+        #role { 
+            font-size: 2em; 
+            margin: 15px 0; 
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Przycisk Magiczny */
+        button { 
+            background: #4a0000; 
+            color: #f0e68c; 
+            border: 2px solid #f0e68c; 
+            padding: 15px 40px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1.1em;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: #7a0000;
+            transform: scale(1.05);
+        }
+
+        .studio-footer {
+            margin-top: 50px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
     </style>
+    <!-- Czcionka w klimacie HP -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Mafia Hogwarts</h1>
-    <div class="card">
-        <h3>Twoja Rola:</h3>
-        <h2 id="role">Oczekiwanie...</h2>
+    <h1>Hogwarts Mafia</h1>
+    
+    <div class="card" id="mainCard">
+        <h3 style="margin-top: 0;">Twoje Przeznaczenie:</h3>
+        <h2 id="role">???</h2>
+        <p id="desc">Dotknij Tiary, by przydzielić rolę...</p>
     </div>
+
     <button onclick="startGame()">TIARA PRZYDZIAŁU</button>
+
+    <div class="studio-footer">
+        Powered by Magiczne Studio Skawina
+    </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        const socket = io(); 
+        const socket = io();
         const roleText = document.getElementById('role');
+        const card = document.getElementById('mainCard');
+        const desc = document.getElementById('desc');
 
         function startGame() {
             socket.emit('start-game');
@@ -29,6 +102,19 @@
 
         socket.on('assign-role', (role) => {
             roleText.innerText = role;
+            
+            // Efekty wizualne zależne od roli
+            if(role.includes('Smierciozerca')) {
+                card.style.backgroundColor = "#2b0505";
+                card.style.color = "#ff4444";
+                card.style.borderColor = "#000";
+                desc.innerText = "Czarny Pan Cię wzywa...";
+            } else {
+                card.style.backgroundColor = "#f4e4bc";
+                card.style.color = "#2b1e16";
+                card.style.borderColor = "#4a3728";
+                desc.innerText = "Niech magia Cię prowadzi!";
+            }
         });
     </script>
 </body>
