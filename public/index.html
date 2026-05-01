@@ -3,61 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <title>Hogwarts Mafia - Studio Skawina</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Fauna+One&display=swap" rel="stylesheet">
     <style>
         body { 
-            background: linear-gradient(rgba(10, 10, 25, 0.85), rgba(10, 10, 25, 0.85)), 
+            background: linear-gradient(rgba(10, 10, 25, 0.9), rgba(10, 10, 25, 0.9)), 
                         url('https://images.unsplash.com/photo-1506466010722-395aa2bef877?q=80&w=1000') no-repeat center center fixed; 
             background-size: cover;
             color: #f0e68c; 
             font-family: 'Fauna One', serif; 
             text-align: center; 
-            margin: 0; padding: 15px;
+            margin: 0; 
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
         }
 
-        h1 { font-family: 'Cinzel', serif; font-size: 2.2em; text-shadow: 0 0 15px #e94560; margin: 10px 0; }
+        h1 { 
+            font-family: 'Cinzel', serif; 
+            font-size: 1.8em; 
+            text-shadow: 0 0 15px #e94560; 
+            margin: 10px 0; 
+        }
 
+        /* POWIĘKSZONA KARTA */
         .card { 
             background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png');
-            border: 6px double #4a3728; 
-            padding: 25px; 
-            margin: 20px auto; 
-            max-width: 320px; 
-            border-radius: 15px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            border: 8px double #4a3728; 
+            padding: 20px; 
+            margin: 10px auto; 
+            width: 90%; /* Karta zajmuje 90% szerokości ekranu */
+            max-width: 400px; 
+            flex-grow: 1; /* Rozciąga kartę w pionie */
+            border-radius: 20px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
             color: #2b1e16;
-            min-height: 250px;
-            display: flex; flex-direction: column; justify-content: center;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
         }
 
-        #role-icon { font-size: 4em; margin-bottom: 10px; display: block; }
-        #role-name { font-family: 'Cinzel', serif; font-size: 1.8em; margin: 5px 0; color: #4a0000; }
-        #role-desc { font-style: italic; font-size: 1em; line-height: 1.4; }
+        /* GIGANTYCZNA IKONA */
+        #role-icon { 
+            font-size: 6em; 
+            margin-bottom: 10px; 
+            display: block; 
+            filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.3));
+        }
 
-        .instruction { font-size: 0.9em; color: #d4af37; margin-bottom: 20px; }
+        #role-name { 
+            font-family: 'Cinzel', serif; 
+            font-size: 2.2em; /* Większa nazwa roli */
+            margin: 5px 0; 
+            color: #4a0000;
+            line-height: 1.1;
+        }
+
+        #role-desc { 
+            font-size: 1.1em; 
+            line-height: 1.4; 
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .instruction { font-size: 0.8em; color: #d4af37; margin-bottom: 5px; }
 
         button { 
-            background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; 
-            padding: 15px 35px; border-radius: 30px; cursor: pointer; 
-            font-family: 'Cinzel', serif; font-size: 1em; 
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            background: #4a0000; 
+            color: #f0e68c; 
+            border: 3px solid #d4af37; 
+            padding: 20px 40px; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            font-family: 'Cinzel', serif; 
+            font-size: 1.2em; 
+            width: 90%;
+            max-width: 400px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
         }
 
-        button:active { transform: scale(0.98); }
+        /* Zmiana dla Śmierciożerców */
+        .death-eater {
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.7) !important;
+            background-color: #3d0a0a !important;
+            color: #ff4444 !important;
+            border-color: #000 !important;
+        }
     </style>
 </head>
 <body>
     <h1>Hogwarts Mafia</h1>
-    <p class="instruction">Zabierz telefon do lochów i czekaj na przydział...</p>
+    <p class="instruction">Skoncentruj się, Zaklinaczu Kodu...</p>
     
     <div class="card" id="mainCard">
         <div id="content-before">
             <span style="font-size: 5em;">⏳</span>
-            <h2>Oczekiwanie...</h2>
-            <p>Aż Mistrz Gry (Niziurski) obudzi Tiarę Przydziału.</p>
+            <h2>Czekaj...</h2>
+            <p>Tiara Przydziału zaraz przemówi.</p>
         </div>
-        <div id="content-after" style="display: none;">
+        <div id="content-after" style="display: none; width: 100%;">
             <span id="role-icon">❓</span>
             <h2 id="role-name">Rola</h2>
             <p id="role-desc">Opis...</p>
@@ -73,23 +122,23 @@
         const roleData = {
             'Harry Potter (Auror)': {
                 icon: '⚡',
-                desc: 'Jesteś liderem Zakonu. Co noc możesz sprawdzić jedną osobę, czy służy Czarnemu Panu. Musisz wyeliminować Mafię przed świtem.'
+                desc: 'Lider Zakonu. Co noc sprawdzasz, czy ktoś służy Czarnemu Panu. Wyeliminuj Mafię!'
             },
             'Ron Weasley (Straznik)': {
                 icon: '🍗',
-                desc: 'Twój urok osobisty chroni przyjaciół. Wybierz jedną osobę, która tej nocy będzie bezpieczna przed zaklęciem Śmierciożerców.'
+                desc: 'Chronisz przyjaciół. Wybierz osobę, która tej nocy będzie bezpieczna.'
             },
             'Smierciozerca (Mafia)': {
                 icon: '💀',
-                desc: 'Służysz Lordowi Voldemortowi. Razem z innymi Śmierciożercami wybierz ofiarę i wyeliminuj wszystkich czarodziejów czystej krwi.'
+                desc: 'Służysz Voldemortowi. Wybierzcie ofiarę i wyeliminujcie czarodziejów!'
             },
             'Uczeń Hogwartu': {
                 icon: '🏰',
-                desc: 'Jesteś zwykłym uczniem. Twoją jedyną bronią jest głosowanie w ciągu dnia. Obserwuj uważnie i znajdź zdrajców!'
+                desc: 'Obserwuj i głosuj w dzień. Znajdź zdrajców ukrytych w zamku!'
             },
             'Severus Snape (Szpieg)': {
                 icon: '🧪',
-                desc: 'Twoje intencje są niejasne. Możesz sprawdzić rolę gracza, ale jeśli zginie Harry, przegrywasz razem z nim.'
+                desc: 'Sprawdzasz role innych. Jeśli Harry zginie, przegrywasz razem z nim.'
             }
         };
 
@@ -107,10 +156,12 @@
             document.getElementById('role-name').innerText = role;
             document.getElementById('role-desc').innerText = data.desc;
 
-            // Zmiana klimatu karty dla Mafii
             if(role.includes('Smierciozerca')) {
-                document.getElementById('mainCard').style.boxShadow = "0 0 30px rgba(255, 0, 0, 0.5)";
-                document.getElementById('role-name').style.color = "#8b0000";
+                document.getElementById('mainCard').classList.add('death-eater');
+                document.getElementById('role-name').style.color = "#ff0000";
+            } else {
+                document.getElementById('mainCard').classList.remove('death-eater');
+                document.getElementById('role-name').style.color = "#4a0000";
             }
         });
     </script>
