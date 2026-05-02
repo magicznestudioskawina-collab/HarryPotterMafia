@@ -15,53 +15,40 @@
             display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
         }
         header { padding: 15px 0; }
-        h1 { font-family: 'Cinzel', serif; font-size: 1.5rem; text-shadow: 0 0 10px #e94560; margin: 0; }
         .card-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 15px; }
         .card { 
             background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png');
             border: 5px double #4a3728; width: 100%; max-width: 340px; border-radius: 15px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: #2b1e16; padding: 25px; transition: 0.5s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: #2b1e16; padding: 25px;
         }
-        #role-icon { font-size: 4rem; margin-bottom: 10px; display: block; }
-        #role-name { font-family: 'Cinzel', serif; font-size: 1.6rem; color: #4a0000; margin: 5px 0; }
-        #role-desc { font-size: 1rem; line-height: 1.4; font-weight: bold; margin-top: 10px; }
-        
-        footer { padding-bottom: 50px; padding-left: 20px; padding-right: 20px; }
+        .dark-side { background-color: #1a0505 !important; color: #ffffff !important; border-color: #ff0000 !important; }
+        .dark-side #role-name { color: #ff4444 !important; }
+        footer { padding-bottom: 50px; }
         button { 
             background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; 
             padding: 16px 0; border-radius: 35px; cursor: pointer; 
-            font-family: 'Cinzel', serif; font-size: 1.1rem; width: 100%; max-width: 280px;
+            font-family: 'Cinzel', serif; font-size: 1.1rem; width: 85%; max-width: 280px;
         }
-
-        /* POPRAWIONA CZYTELNOŚĆ DLA ŚMIERCIÓŻERCÓW */
-        .dark-side { 
-            background-color: #1a0505 !important; 
-            color: #ffffff !important; /* Biały tekst dla kontrastu */
-            border-color: #ff0000 !important;
-            box-shadow: 0 0 35px rgba(255, 0, 0, 0.8) !important;
-        }
-        .dark-side #role-name { color: #ff4444 !important; text-shadow: 0 0 5px #000; }
-        .dark-side #role-desc { color: #eeeeee !important; }
+        #night-overlay { display: none; color: #ff4444; font-family: 'Cinzel'; margin-top: 10px; }
     </style>
 </head>
 <body>
     <header><h1>Hogwarts Mafia</h1></header>
     <div class="card-container">
         <div class="card" id="mainCard">
-            <div id="content-before">
-                <span style="font-size: 4rem;">⏳</span>
-                <h2>Tiara czeka...</h2>
-            </div>
-            <div id="content-after" style="display: none;">
-                <span id="role-icon">❓</span>
-                <h2 id="role-name">Rola</h2>
+            <div id="status-text">⏳ Oczekiwanie na start...</div>
+            <div id="role-display" style="display:none;">
+                <span id="role-icon" style="font-size: 4rem;">❓</span>
+                <h2 id="role-name" style="font-family:'Cinzel';">Rola</h2>
                 <p id="role-desc">Opis...</p>
+                <div id="night-overlay">🌙 NOC ZAPADŁA...</div>
             </div>
         </div>
     </div>
-    <footer><button onclick="startGame()">Rozpocznij Noc</button></footer>
+    <footer id="game-footer">
+        <button id="startBtn" onclick="pressStart()">ROZPOCZNIJ NOC</button>
+    </footer>
 
-    <!-- Dźwięk magiczny (możesz podmienić na własny link mp3) -->
     <audio id="magicSound" src="https://www.soundjay.com/magic/sounds/magic-chime-01.mp3"></audio>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -70,30 +57,35 @@
         const roleData = {
             'Harry Potter (Auror)': { icon: '⚡', desc: 'Sprawdź lojalność jednego gracza.' },
             'Ron Weasley (Straznik)': { icon: '🍗', desc: 'Wybierz gracza do ochrony.' },
-            'Hermiona Granger (Logika)': { icon: '📚', desc: 'Uratuj kogoś przed wygnaniem.' },
             'Smierciozerca (Mafia)': { icon: '💀', desc: 'Wyeliminujcie czarodziejów.' },
             'Lord Voldemort (Lider Mafii)': { icon: '🐍', desc: 'Jesteś niewykrywalny dla Harry’ego.' },
-            'Uczeń Hogwartu': { icon: '🏰', desc: 'Głosuj i przetrwaj.' },
-            'Severus Snape (Szpieg)': { icon: '🧪', desc: 'Poznaj role innych.' }
+            'Uczeń Hogwartu': { icon: '🏰', desc: 'Głosuj i przetrwaj.' }
         };
 
-        function startGame() { socket.emit('start-game'); }
-
-        socket.on('play-sound', () => { document.getElementById('magicSound').play(); });
+        function pressStart() {
+            document.getElementById('magicSound').play();
+            socket.emit('start-game');
+        }
 
         socket.on('assign-role', (role) => {
-            document.getElementById('content-before').style.display = 'none';
-            document.getElementById('content-after').style.display = 'block';
+            document.getElementById('status-text').style.display = 'none';
+            document.getElementById('role-display').style.display = 'block';
+            document.getElementById('startBtn').style.display = 'none'; // Przycisk znika po starcie
+            
             const data = roleData[role] || { icon: '✨', desc: 'Los nieznany.' };
             document.getElementById('role-icon').innerText = data.icon;
             document.getElementById('role-name').innerText = role;
             document.getElementById('role-desc').innerText = data.desc;
-            
+
             if(role.includes('Mafia') || role.includes('Voldemort')) {
-                document.getElementById('mainCard').className = 'card dark-side';
-            } else {
-                document.getElementById('mainCard').className = 'card';
+                document.getElementById('mainCard').classList.add('dark-side');
             }
+        });
+
+        socket.on('night-started', () => {
+            document.getElementById('night-overlay').style.display = 'block';
+            // Tutaj możesz dodać wibrację telefonu
+            if (navigator.vibrate) navigator.vibrate(200);
         });
     </script>
 </body>
