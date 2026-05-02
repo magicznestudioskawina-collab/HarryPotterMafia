@@ -7,52 +7,59 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Fauna+One&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        body { background: #050510; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center; }
+        body { 
+            background: linear-gradient(rgba(10, 10, 25, 0.85), rgba(10, 10, 25, 0.85)), 
+                        url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1000') no-repeat center center fixed; 
+            background-size: cover; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center;
+        }
         .screen { min-height: 100vh; display: none; padding: 20px; box-sizing: border-box; }
-        h1 { font-family: 'Cinzel'; font-size: 2.5rem; color: #e94560; text-shadow: 0 0 15px #e94560; }
-        .setup-card { background: rgba(0,0,0,0.8); border: 2px solid #d4af37; padding: 30px; border-radius: 20px; max-width: 500px; margin: auto; }
-        .player-tag { background: #4a0000; padding: 10px 20px; border-radius: 25px; margin: 5px; display: inline-block; font-family: 'Cinzel'; border: 1px solid #d4af37; }
-        .player-card { background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png'); color: #2b1e16; border: 8px double #4a3728; padding: 30px; border-radius: 20px; max-width: 360px; margin: 20px auto; }
-        .dark-mode { background-color: #1a0505 !important; color: #fff !important; border-color: #ff0000 !important; }
-        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 15px 30px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; }
+        h1 { font-family: 'Cinzel'; font-size: 2.8rem; color: #e94560; text-shadow: 0 0 15px #e94560; margin: 10px 0; }
+        .box { background: rgba(0,0,0,0.85); border: 2px solid #d4af37; padding: 25px; border-radius: 20px; max-width: 500px; margin: auto; }
+        .player-tag { background: #4a0000; padding: 8px 18px; border-radius: 25px; margin: 5px; display: inline-block; font-family: 'Cinzel'; border: 1px solid #d4af37; font-size: 1.1rem; }
+        .player-card { background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png'); color: #2b1e16; border: 8px double #4a3728; padding: 30px; border-radius: 20px; max-width: 360px; margin: 20px auto; box-shadow: 0 15px 35px rgba(0,0,0,0.7); }
+        .dark-side { background-color: #1a0505 !important; color: #fff !important; border-color: #ff0000 !important; }
+        .dark-side h2 { color: #ff4444 !important; }
+        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 15px 35px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
+        button:hover { transform: scale(1.05); background: #600000; }
+        input { padding: 12px; border-radius: 10px; border: none; font-size: 1.1rem; text-align: center; width: 80%; }
     </style>
 </head>
 <body>
 
     <div id="screen-setup" class="screen">
-        <h1>Konfiguracja Potyczki</h1>
-        <div class="setup-card">
-            <h2>Liczba Graczy:</h2>
-            <input type="number" id="cInput" value="10" min="10" style="padding:10px; border-radius:10px; text-align:center;">
+        <h1>Magiczne Studio Skawina</h1>
+        <div class="box">
+            <h2>Ilu czarodziejów zagra?</h2>
+            <input type="number" id="cInput" value="10" min="10">
             <br><br>
-            <button onclick="initGame()">PRZYGOTUJ MAGIĘ</button>
+            <button onclick="initGame()">PRZYGOTUJ POTYCZKĘ</button>
         </div>
     </div>
 
     <div id="screen-main" class="screen">
-        <h1>Oczekiwanie w Wielkiej Sali</h1>
-        <div id="qr-code" style="background:white; padding:10px; display:inline-block; border-radius:10px; margin:20px;"></div>
-        <h2 id="count-label">Dołączyli: 0 / 0</h2>
-        <div id="p-list" style="margin-bottom:30px;"></div>
+        <h1>Wielka Sala</h1>
+        <div id="qr-code" style="background:white; padding:10px; display:inline-block; border-radius:10px; margin:15px;"></div>
+        <h2 id="count-label">Czekam na graczy...</h2>
+        <div id="p-list" style="margin-bottom:25px; display: flex; flex-wrap: wrap; justify-content: center;"></div>
         <button id="sBtn" style="display:none;" onclick="start()">NIECH ROZPOCZNIE SIĘ INTRYGA</button>
     </div>
 
     <div id="screen-night" class="screen">
-        <h1 style="color:#ff0000; font-size:4rem;">🌙 NOC ZAPADŁA</h1>
-        <h2 style="font-family:'Cinzel'">Wszyscy gracze zamykają oczy...</h2>
+        <h1 style="color:#ff0000; font-size:4.5rem; margin-top: 10vh;">🌙 NOC ZAPADŁA</h1>
+        <h2 style="font-family:'Cinzel'; font-size: 2rem;">Śmierciożercy szykują różdżki...</h2>
     </div>
 
-    <div id="screen-player" class="screen">
+    <div id="screen-player" class="screen" style="padding-top: 40px;">
         <div id="j-sec">
-            <h2>Twoje Imię, Czarodzieju:</h2>
-            <input type="text" id="nameInp" style="padding:15px; border-radius:10px; width:80%;">
+            <h1>Potyczka w Hogwarcie</h1>
+            <input type="text" id="nameInp" placeholder="Twoje imię...">
             <br><br>
-            <button onclick="join()">DOŁĄCZ</button>
+            <button onclick="join()">DOŁĄCZ DO GRY</button>
         </div>
         <div id="p-card" class="player-card" style="display:none;">
-            <span id="p-icon" style="font-size:5rem;"></span>
-            <h2 id="p-role" style="font-family:'Cinzel';"></h2>
-            <p id="p-desc" style="font-weight:bold;"></p>
+            <span id="p-icon" style="font-size:5.5rem;"></span>
+            <h2 id="p-role" style="font-family:'Cinzel'; font-size: 2rem; margin: 10px 0;"></h2>
+            <p id="p-desc" style="font-weight:bold; line-height: 1.5; font-size: 1.1rem;"></p>
         </div>
     </div>
 
@@ -85,7 +92,7 @@
             document.getElementById('p-icon').innerText = p.icon;
             document.getElementById('p-role').innerText = p.role;
             document.getElementById('p-desc').innerText = p.desc;
-            if(p.role.match(/Voldemort|Smierciozerca|Bellatrix/)) card.classList.add('dark-mode');
+            if(p.role.match(/Voldemort|Smierciozerca|Bellatrix/)) card.classList.add('dark-side');
         });
 
         socket.on('update-player-list', (d) => {
@@ -97,10 +104,9 @@
         function start() { socket.emit('start-intrigue'); }
 
         socket.on('transition-to-night', () => {
-            const synth = window.speechSynthesis;
             const utter = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Zapada noc nad Hogwartem. Niech wszyscy gracze zamkną oczy.");
             utter.lang = 'pl-PL'; utter.pitch = 0.5; utter.rate = 0.7;
-            synth.speak(utter);
+            window.speechSynthesis.speak(utter);
             if(!mobile) {
                 document.getElementById('screen-main').style.display = 'none';
                 document.getElementById('screen-night').style.display = 'block';
