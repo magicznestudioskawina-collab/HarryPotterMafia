@@ -7,125 +7,105 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Fauna+One&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        body { 
-            background: linear-gradient(rgba(10, 10, 25, 0.85), rgba(10, 10, 25, 0.85)), 
-                        url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1000') no-repeat center center fixed; 
-            background-size: cover; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center; 
-        }
-        .screen { min-height: 100vh; display: none; padding: 5vh 20px; box-sizing: border-box; }
-        h1 { font-family: 'Cinzel'; font-size: 3rem; color: #e94560; text-shadow: 0 0 20px #e94560; }
-        .setup-box { background: rgba(0,0,0,0.8); padding: 30px; border-radius: 20px; border: 2px solid #d4af37; max-width: 500px; margin: auto; }
-        .player-list-box { background: rgba(0,0,0,0.6); border: 2px solid #d4af37; border-radius: 15px; padding: 20px; max-width: 800px; margin: 20px auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .player-tag { background: #4a0000; color: #f0e68c; padding: 8px 15px; border-radius: 20px; font-family: 'Cinzel'; border: 1px solid #f0e68c; }
+        body { background: #050510; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center; }
+        .screen { min-height: 100vh; display: none; padding: 20px; box-sizing: border-box; }
+        h1 { font-family: 'Cinzel'; font-size: 2.5rem; color: #e94560; text-shadow: 0 0 15px #e94560; }
+        .setup-card { background: rgba(0,0,0,0.8); border: 2px solid #d4af37; padding: 30px; border-radius: 20px; max-width: 500px; margin: auto; }
+        .player-tag { background: #4a0000; padding: 10px 20px; border-radius: 25px; margin: 5px; display: inline-block; font-family: 'Cinzel'; border: 1px solid #d4af37; }
         .player-card { background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png'); color: #2b1e16; border: 8px double #4a3728; padding: 30px; border-radius: 20px; max-width: 360px; margin: 20px auto; }
-        .dark-side { background-color: #1a0505 !important; color: #fff !important; border-color: #ff0000 !important; }
-        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 15px 30px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; font-size: 1.1rem; }
-        input { padding: 12px; border-radius: 10px; border: none; font-size: 1.1rem; text-align: center; }
+        .dark-mode { background-color: #1a0505 !important; color: #fff !important; border-color: #ff0000 !important; }
+        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 15px 30px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- EKRAN KONFIGURACJI (TYLKO KOMPUTER) -->
     <div id="screen-setup" class="screen">
-        <h1>Magiczne Studio Skawina</h1>
-        <div class="setup-box">
-            <h2>Ilu czarodziejów stanie do walki?</h2>
-            <p>(Minimum 10 graczy dla pełnego balansu)</p>
-            <input type="number" id="countInput" value="10" min="10">
+        <h1>Konfiguracja Potyczki</h1>
+        <div class="setup-card">
+            <h2>Liczba Graczy:</h2>
+            <input type="number" id="cInput" value="10" min="10" style="padding:10px; border-radius:10px; text-align:center;">
             <br><br>
-            <button onclick="setupGame()">GENERUJ KOD PRZYDZIAŁU</button>
+            <button onclick="initGame()">PRZYGOTUJ MAGIĘ</button>
         </div>
     </div>
 
-    <!-- EKRAN OCZEKIWANIA (KOMPUTER) -->
     <div id="screen-main" class="screen">
-        <h1>Potyczka w Hogwarcie</h1>
-        <div id="qr-display" style="background: white; padding: 10px; display: inline-block; border-radius: 10px; margin: 20px;"></div>
-        <h2 id="wait-msg">Dołączyli (0 / 0):</h2>
-        <div id="player-list" class="player-list-box"></div>
-        <button id="startBtn" style="display:none;" onclick="startIntrigue()">NIECH ROZPOCZNIE SIĘ INTRYGA</button>
+        <h1>Oczekiwanie w Wielkiej Sali</h1>
+        <div id="qr-code" style="background:white; padding:10px; display:inline-block; border-radius:10px; margin:20px;"></div>
+        <h2 id="count-label">Dołączyli: 0 / 0</h2>
+        <div id="p-list" style="margin-bottom:30px;"></div>
+        <button id="sBtn" style="display:none;" onclick="start()">NIECH ROZPOCZNIE SIĘ INTRYGA</button>
     </div>
 
-    <!-- EKRAN NOCY -->
     <div id="screen-night" class="screen">
-        <h1 style="color: #ff0000; font-size: 4rem;">🌙 NOC ZAPADŁA</h1>
-        <h2 style="font-family: 'Cinzel'">Złamane pakty, mroczne różdżki...</h2>
+        <h1 style="color:#ff0000; font-size:4rem;">🌙 NOC ZAPADŁA</h1>
+        <h2 style="font-family:'Cinzel'">Wszyscy gracze zamykają oczy...</h2>
     </div>
 
-    <!-- EKRAN GRACZA (TELEFON) -->
-    <div id="screen-player" class="screen" style="padding-top: 50px;">
-        <div id="join-section">
-            <h2 id="join-title">Hogwart czeka...</h2>
-            <input type="text" id="pName" placeholder="Twoje Imię...">
+    <div id="screen-player" class="screen">
+        <div id="j-sec">
+            <h2>Twoje Imię, Czarodzieju:</h2>
+            <input type="text" id="nameInp" style="padding:15px; border-radius:10px; width:80%;">
             <br><br>
             <button onclick="join()">DOŁĄCZ</button>
         </div>
-        <div id="player-card" class="player-card" style="display:none;">
-            <span style="font-size: 5rem;" id="r-icon"></span>
-            <h2 id="r-name" style="font-family: 'Cinzel';"></h2>
-            <p id="r-desc" style="font-weight: bold;"></p>
+        <div id="p-card" class="player-card" style="display:none;">
+            <span id="p-icon" style="font-size:5rem;"></span>
+            <h2 id="p-role" style="font-family:'Cinzel';"></h2>
+            <p id="p-desc" style="font-weight:bold;"></p>
         </div>
     </div>
 
     <script>
         const socket = io();
-        const isMobile = /iPhone|Android/i.test(navigator.userAgent);
+        const mobile = /iPhone|Android/i.test(navigator.userAgent);
+        document.getElementById(mobile ? 'screen-player' : 'screen-setup').style.display = 'block';
 
-        if (!isMobile) {
-            document.getElementById('screen-setup').style.display = 'block';
-        } else {
-            document.getElementById('screen-player').style.display = 'block';
+        function initGame() {
+            socket.emit('set-game-config', { count: document.getElementById('cInput').value });
         }
 
-        function setupGame() {
-            const val = document.getElementById('countInput').value;
-            socket.emit('set-player-count', val);
-        }
-
-        socket.on('game-ready', (count) => {
+        socket.on('game-ready', (data) => {
             document.getElementById('screen-setup').style.display = 'none';
             document.getElementById('screen-main').style.display = 'block';
-            const url = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${window.location.href}`;
-            document.getElementById('qr-display').innerHTML = `<img src="${url}">`;
-            document.getElementById('wait-msg').innerText = `Dołączyli (0 / ${count}):`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${window.location.href}`;
+            document.getElementById('qr-code').innerHTML = `<img src="${qrUrl}">`;
+            document.getElementById('count-label').innerText = `Dołączyli: 0 / ${data.target}`;
         });
 
         function join() {
-            const n = document.getElementById('pName').value;
+            const n = document.getElementById('nameInp').value;
             if(n) socket.emit('join-game', n);
         }
 
         socket.on('assign-role', (p) => {
-            document.getElementById('join-section').style.display = 'none';
-            const card = document.getElementById('player-card');
+            document.getElementById('j-sec').style.display = 'none';
+            const card = document.getElementById('p-card');
             card.style.display = 'block';
-            document.getElementById('r-icon').innerText = p.icon;
-            document.getElementById('r-name').innerText = p.role;
-            document.getElementById('r-desc').innerText = p.desc;
-            if(p.role.match(/Voldemort|Smierciozerca|Bellatrix/)) card.classList.add('dark-side');
+            document.getElementById('p-icon').innerText = p.icon;
+            document.getElementById('p-role').innerText = p.role;
+            document.getElementById('p-desc').innerText = p.desc;
+            if(p.role.match(/Voldemort|Smierciozerca|Bellatrix/)) card.classList.add('dark-mode');
         });
 
-        socket.on('update-player-list', (data) => {
-            document.getElementById('wait-msg').innerText = `Dołączyli (${data.players.length} / ${data.target}):`;
-            document.getElementById('player-list').innerHTML = data.players.map(p => `<div class="player-tag">${p.name}</div>`).join("");
-            if(data.players.length >= data.target) {
-                document.getElementById('startBtn').style.display = 'inline-block';
-            }
+        socket.on('update-player-list', (d) => {
+            document.getElementById('count-label').innerText = `Dołączyli: ${d.players.length} / ${d.target}`;
+            document.getElementById('p-list').innerHTML = d.players.map(p => `<div class="player-tag">${p.name}</div>`).join("");
+            if(d.players.length >= d.target) document.getElementById('sBtn').style.display = 'inline-block';
         });
 
-        function startIntrigue() { socket.emit('start-intrigue'); }
+        function start() { socket.emit('start-intrigue'); }
 
         socket.on('transition-to-night', () => {
-            const msg = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Zapada noc nad Hogwartem. Niech wszyscy gracze zamkną oczy.");
-            msg.lang = 'pl-PL'; msg.pitch = 0.5; msg.rate = 0.7;
-            window.speechSynthesis.speak(msg);
-            if(!isMobile) {
+            const synth = window.speechSynthesis;
+            const utter = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Zapada noc nad Hogwartem. Niech wszyscy gracze zamkną oczy.");
+            utter.lang = 'pl-PL'; utter.pitch = 0.5; utter.rate = 0.7;
+            synth.speak(utter);
+            if(!mobile) {
                 document.getElementById('screen-main').style.display = 'none';
                 document.getElementById('screen-night').style.display = 'block';
             }
         });
-
-        socket.on('error-msg', (m) => alert(m));
     </script>
 </body>
 </html>
