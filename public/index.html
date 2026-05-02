@@ -7,118 +7,86 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Fauna+One&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        body { background: #0a0a19; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center; }
-        
-        /* EKRAN GŁÓWNY */
-        #screen-main { padding: 5vh 20px; min-height: 100vh; display: none; background: radial-gradient(circle, #1a1a3a 0%, #0a0a19 100%); }
-        h1 { font-family: 'Cinzel'; font-size: 3.5rem; color: #e94560; text-shadow: 0 0 20px #e94560; }
-        .qr-area { background: white; padding: 15px; display: inline-block; border-radius: 15px; margin: 20px; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
-        .player-chip { display: inline-block; background: rgba(233, 69, 96, 0.2); border: 1px solid #e94560; padding: 10px 20px; border-radius: 50px; margin: 5px; font-size: 1.2rem; transition: 0.3s; }
-
-        /* EKRAN NOCY (PLANSZA ROZGRYWKI) */
-        #screen-night { display: none; min-height: 100vh; background: #050510; padding: 5vh 20px; }
-        .night-title { font-family: 'Cinzel'; font-size: 4rem; color: #ff4444; animation: pulse 2s infinite; }
-
-        /* EKRAN GRACZA (TELEFON) */
-        #screen-player { padding: 20px; display: none; }
+        /* Twoje poprzednie style z poprawkami kontrastu */
+        body { background: #050510; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center; }
+        #screen-main, #screen-night { min-height: 100vh; display: none; padding: 5vh 20px; }
+        h1 { font-family: 'Cinzel'; font-size: 3rem; color: #e94560; text-shadow: 0 0 20px rgba(233, 69, 96, 0.5); }
         .player-card { 
             background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png');
             color: #2b1e16; border: 8px double #4a3728; padding: 30px; border-radius: 20px;
-            max-width: 360px; margin: 20px auto; box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            max-width: 360px; margin: 20px auto; box-shadow: 0 15px 40px rgba(0,0,0,0.7);
         }
-        .role-icon { font-size: 5rem; display: block; margin-bottom: 10px; }
-        .role-name { font-family: 'Cinzel'; font-size: 2rem; color: #4a0000; margin: 10px 0; }
-
-        input { padding: 15px; width: 80%; border-radius: 10px; border: none; font-size: 1.2rem; margin-bottom: 20px; }
-        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 15px 40px; font-family: 'Cinzel'; font-size: 1.2rem; border-radius: 50px; cursor: pointer; transition: 0.3s; }
-        button:hover { transform: scale(1.1); background: #600000; }
-
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .dark-side { background-color: #1a0505 !important; color: #fff !important; border-color: #ff0000 !important; }
+        .dark-side .role-name { color: #ff4444 !important; }
+        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 20px 50px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
     <div id="screen-main">
-        <h1>Witaj w Potyczce w Hogwarcie</h1>
-        <div class="qr-area">
+        <h1>Potyczka w Hogwarcie</h1>
+        <div style="background: white; padding: 10px; display: inline-block; border-radius: 10px; margin: 20px;">
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://harrypottermafia.onrender.com" alt="QR">
         </div>
-        <div id="player-list-container">
-            <h2 style="font-family:'Cinzel'">Czarodzieje w kolejce:</h2>
-            <div id="player-list">Czekamy na pierwszych odważnych...</div>
-        </div>
-        <br><br>
+        <div id="player-list" style="margin: 20px; font-size: 1.2rem;"></div>
         <button onclick="startIntrigue()">NIECH ROZPOCZNIE SIĘ INTRYGA</button>
     </div>
 
     <div id="screen-night">
-        <h1 class="night-title">🌙 NOC ZAPADŁA</h1>
-        <h2 style="font-family:'Cinzel'; color: #fff;">Wszyscy czarodzieje zamykają oczy...</h2>
-        <div id="night-players" style="margin-top: 50px;"></div>
+        <h1 style="color: #ff0000; font-size: 4rem;">🌙 NOC ZAPADŁA</h1>
+        <h2 style="font-family: 'Cinzel'">Śmierciożercy szykują Avada Kedavra...</h2>
+        <div id="night-players"></div>
     </div>
 
     <div id="screen-player">
-        <div id="join-section">
-            <h1 style="font-size: 1.8rem;">Twoja Przygoda Czeka</h1>
-            <input type="text" id="pName" placeholder="Twoje Imię...">
-            <button onclick="join()">DOŁĄCZ DO GRY</button>
+        <div id="join-section" style="padding: 40px;">
+            <input type="text" id="pName" placeholder="Twoje Imię..." style="padding: 15px; width: 80%; margin-bottom: 20px; border-radius: 10px;">
+            <button onclick="join()">DOŁĄCZ</button>
         </div>
         <div id="player-card" class="player-card" style="display:none;">
-            <span class="role-icon" id="r-icon">❓</span>
-            <h2 class="role-name" id="r-name">Rola</h2>
-            <p id="r-desc" style="font-weight: bold; line-height: 1.4;">Opis mocy...</p>
-            <div id="mobile-night-msg" style="display:none; color: #7a0000; margin-top: 20px; font-weight: bold;">🌙 NOC TRWA... CZEKAJ NA ROZKAZY!</div>
+            <span style="font-size: 5rem;" id="r-icon"></span>
+            <h2 class="role-name" id="r-name"></h2>
+            <p id="r-desc" style="font-weight: bold;"></p>
         </div>
     </div>
 
     <script>
         const socket = io();
         const isMobile = /iPhone|Android/i.test(navigator.userAgent);
-
-        if (isMobile) {
-            document.getElementById('screen-player').style.display = 'block';
-        } else {
-            document.getElementById('screen-main').style.display = 'block';
-        }
+        
+        document.getElementById(isMobile ? 'screen-player' : 'screen-main').style.display = 'block';
 
         function join() {
             const n = document.getElementById('pName').value;
-            if(n) {
-                socket.emit('join-game', n);
-                document.getElementById('join-section').style.display = 'none';
-            }
+            if(n) { socket.emit('join-game', n); document.getElementById('join-section').style.display = 'none'; }
         }
 
-        function startIntrigue() {
-            socket.emit('start-intrigue');
-        }
+        function startIntrigue() { socket.emit('start-intrigue'); }
 
         socket.on('assign-role', (p) => {
-            document.getElementById('player-card').style.display = 'block';
+            const card = document.getElementById('player-card');
+            card.style.display = 'block';
             document.getElementById('r-icon').innerText = p.icon;
             document.getElementById('r-name').innerText = p.role;
             document.getElementById('r-desc').innerText = p.desc;
+            if(p.role.match(/Voldemort|Smierciozerca|Bellatrix/)) card.classList.add('dark-side');
         });
 
         socket.on('update-player-list', (players) => {
-            const list = document.getElementById('player-list');
-            const nightList = document.getElementById('night-players');
-            list.innerHTML = players.map(p => `<span class="player-chip">${p.name}</span>`).join("");
-            nightList.innerHTML = players.map(p => `<h2 style="font-family:'Cinzel'">${p.name}</h2>`).join("");
+            document.getElementById('player-list').innerHTML = players.map(p => `<span>${p.name}</span>`).join(" | ");
         });
 
         socket.on('transition-to-night', () => {
-            // Dźwięk i Głos
-            const msg = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Noc zapadła nad Hogwartem.");
+            // Klimatyczny głos
+            const msg = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Noc zapadła nad Hogwartem. Śmierciożercy, szykujcie różdżki do Avada Kedavra.");
             msg.lang = 'pl-PL';
+            msg.pitch = 0.6; // Niższy głos
+            msg.rate = 0.8;  // Wolniejszy głos
             window.speechSynthesis.speak(msg);
 
             if(!isMobile) {
                 document.getElementById('screen-main').style.display = 'none';
                 document.getElementById('screen-night').style.display = 'block';
-            } else {
-                document.getElementById('mobile-night-msg').style.display = 'block';
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
             }
         });
     </script>
