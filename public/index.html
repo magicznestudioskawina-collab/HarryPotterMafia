@@ -14,25 +14,34 @@
             text-align: center; margin: 0; padding: 0; height: 100vh;
             display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
         }
-        header { padding: 20px 0 10px 0; flex-shrink: 0; }
-        h1 { font-family: 'Cinzel', serif; font-size: 1.6rem; text-shadow: 0 0 10px #e94560; margin: 0; }
+        header { padding: 15px 0; }
+        h1 { font-family: 'Cinzel', serif; font-size: 1.5rem; text-shadow: 0 0 10px #e94560; margin: 0; }
         .card-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 15px; }
         .card { 
             background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png');
             border: 5px double #4a3728; width: 100%; max-width: 340px; border-radius: 15px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: #2b1e16; padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: #2b1e16; padding: 25px; transition: 0.5s;
         }
         #role-icon { font-size: 4rem; margin-bottom: 10px; display: block; }
         #role-name { font-family: 'Cinzel', serif; font-size: 1.6rem; color: #4a0000; margin: 5px 0; }
         #role-desc { font-size: 1rem; line-height: 1.4; font-weight: bold; margin-top: 10px; }
-        footer { padding-bottom: 50px; padding-left: 20px; padding-right: 20px; flex-shrink: 0; }
+        
+        footer { padding-bottom: 50px; padding-left: 20px; padding-right: 20px; }
         button { 
             background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; 
             padding: 16px 0; border-radius: 35px; cursor: pointer; 
             font-family: 'Cinzel', serif; font-size: 1.1rem; width: 100%; max-width: 280px;
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); text-transform: uppercase;
         }
-        .dark-side { box-shadow: 0 0 30px rgba(255, 0, 0, 0.7) !important; background-color: #3d0a0a !important; color: #ff4444 !important; }
+
+        /* POPRAWIONA CZYTELNOŚĆ DLA ŚMIERCIÓŻERCÓW */
+        .dark-side { 
+            background-color: #1a0505 !important; 
+            color: #ffffff !important; /* Biały tekst dla kontrastu */
+            border-color: #ff0000 !important;
+            box-shadow: 0 0 35px rgba(255, 0, 0, 0.8) !important;
+        }
+        .dark-side #role-name { color: #ff4444 !important; text-shadow: 0 0 5px #000; }
+        .dark-side #role-desc { color: #eeeeee !important; }
     </style>
 </head>
 <body>
@@ -41,8 +50,7 @@
         <div class="card" id="mainCard">
             <div id="content-before">
                 <span style="font-size: 4rem;">⏳</span>
-                <h2 style="font-family: 'Cinzel';">Oczekiwanie</h2>
-                <p>Tiara zaraz przydzieli role...</p>
+                <h2>Tiara czeka...</h2>
             </div>
             <div id="content-after" style="display: none;">
                 <span id="role-icon">❓</span>
@@ -51,38 +59,40 @@
             </div>
         </div>
     </div>
-    <footer><button onclick="startGame()">Tiara Przydziału</button></footer>
+    <footer><button onclick="startGame()">Rozpocznij Noc</button></footer>
+
+    <!-- Dźwięk magiczny (możesz podmienić na własny link mp3) -->
+    <audio id="magicSound" src="https://www.soundjay.com/magic/sounds/magic-chime-01.mp3"></audio>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
         const socket = io();
         const roleData = {
-            'Harry Potter (Auror)': { icon: '⚡', desc: 'Lider Zakonu. Co noc sprawdzasz lojalność jednego gracza.' },
-            'Ron Weasley (Straznik)': { icon: '🍗', desc: 'Wybrany przez Ciebie gracz jest bezpieczny tej nocy.' },
-            'Hermiona Granger (Logika)': { icon: '📚', desc: 'Twoja wiedza pozwala raz uratować kogoś przed wygnaniem.' },
-            'Albus Dumbledore (Mentor)': { icon: '🧙‍♂️', desc: 'Twoja mądrość chroni zamek. Jeśli zginiesz, Zakon słabnie.' },
-            'Severus Snape (Szpieg)': { icon: '🧪', desc: 'Sprawdzasz role innych. Twoje cele są Twoją tajemnicą.' },
-            'Smierciozerca (Mafia)': { icon: '💀', desc: 'Służysz Panu Ciemności. Razem wyeliminujcie czarodziejów.' },
-            'Bellatrix Lestrange (Mafia)': { icon: '🪄', desc: 'Możesz raz w grze uciszyć wybranego gracza na jedną turę.' },
-            'Lord Voldemort (Lider Mafii)': { icon: '🐍', desc: 'Twoja tożsamość jest ukryta przed czarami sprawdzającymi.' },
-            'Uczeń Hogwartu': { icon: '🏰', desc: 'Głosuj mądrze w dzień i spróbuj przetrwać w zamku.' },
-            'Neville Longbottom (Bohater)': { icon: '🌱', desc: 'Masz jedną dodatkową szansę na przetrwanie ataku.' }
+            'Harry Potter (Auror)': { icon: '⚡', desc: 'Sprawdź lojalność jednego gracza.' },
+            'Ron Weasley (Straznik)': { icon: '🍗', desc: 'Wybierz gracza do ochrony.' },
+            'Hermiona Granger (Logika)': { icon: '📚', desc: 'Uratuj kogoś przed wygnaniem.' },
+            'Smierciozerca (Mafia)': { icon: '💀', desc: 'Wyeliminujcie czarodziejów.' },
+            'Lord Voldemort (Lider Mafii)': { icon: '🐍', desc: 'Jesteś niewykrywalny dla Harry’ego.' },
+            'Uczeń Hogwartu': { icon: '🏰', desc: 'Głosuj i przetrwaj.' },
+            'Severus Snape (Szpieg)': { icon: '🧪', desc: 'Poznaj role innych.' }
         };
 
         function startGame() { socket.emit('start-game'); }
 
+        socket.on('play-sound', () => { document.getElementById('magicSound').play(); });
+
         socket.on('assign-role', (role) => {
             document.getElementById('content-before').style.display = 'none';
             document.getElementById('content-after').style.display = 'block';
-            const data = roleData[role] || { icon: '✨', desc: 'Przeznaczenie nieznane...' };
+            const data = roleData[role] || { icon: '✨', desc: 'Los nieznany.' };
             document.getElementById('role-icon').innerText = data.icon;
             document.getElementById('role-name').innerText = role;
             document.getElementById('role-desc').innerText = data.desc;
             
-            if(role.includes('Mafia') || role.includes('Voldemort') || role.includes('Lestrange')) {
-                document.getElementById('mainCard').classList.add('dark-side');
+            if(role.includes('Mafia') || role.includes('Voldemort')) {
+                document.getElementById('mainCard').className = 'card dark-side';
             } else {
-                document.getElementById('mainCard').classList.remove('dark-side');
+                document.getElementById('mainCard').className = 'card';
             }
         });
     </script>
