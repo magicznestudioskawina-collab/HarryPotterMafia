@@ -1,45 +1,41 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http, {
-    cors: { origin: "*", methods: ["GET", "POST"] }
-});
+const io = require('socket.io')(http, { cors: { origin: "*" } });
 
 const PORT = process.env.PORT || 3000;
-
 app.use(express.static('public'));
 
-const roles = [
-    'Harry Potter (Auror)', 
-    'Ron Weasley (Straznik)', 
-    'Hermiona Granger (Logika)',
-    'Albus Dumbledore (Mentor)',
-    'Severus Snape (Szpieg)', 
-    'Smierciozerca (Mafia)', 
-    'Bellatrix Lestrange (Mafia)',
-    'Lord Voldemort (Lider Mafii)',
-    'Uczeń Hogwartu',
-    'Neville Longbottom (Bohater)'
-];
-
 io.on('connection', (socket) => {
-    console.log('Czarodziej dołączył do sieci!');
+    console.log('Nowy czarodziej w zamku!');
 
     socket.on('start-game', () => {
         const allSockets = Array.from(io.sockets.sockets.values());
-        let shuffledRoles = [...roles].sort(() => 0.5 - Math.random());
+        const count = allSockets.length;
+
+        // Dynamiczny balans ról
+        let gameRoles = [];
+        if (count >= 1) gameRoles.push('Harry Potter (Auror)');
+        if (count >= 2) gameRoles.push('Lord Voldemort (Lider Mafii)');
+        if (count >= 3) gameRoles.push('Ron Weasley (Straznik)');
+        if (count >= 4) gameRoles.push('Smierciozerca (Mafia)');
+        if (count >= 5) gameRoles.push('Hermiona Granger (Logika)');
+        if (count >= 6) gameRoles.push('Severus Snape (Szpieg)');
         
+        // Reszta to uczniowie
+        while (gameRoles.length < count) {
+            gameRoles.push('Uczeń Hogwartu');
+        }
+
+        let shuffled = gameRoles.sort(() => 0.5 - Math.random());
+        
+        // Sygnał do dźwięku dla urządzenia, które kliknęło START
+        socket.emit('play-sound');
+
         allSockets.forEach((s, index) => {
-            const assignedRole = shuffledRoles[index % shuffledRoles.length];
-            s.emit('assign-role', assignedRole);
+            s.emit('assign-role', shuffled[index]);
         });
     });
-
-    socket.on('disconnect', () => {
-        console.log('Czarodziej opuścił zamek.');
-    });
 });
 
-http.listen(PORT, '0.0.0.0', () => {
-    console.log(`Magiczne Studio Skawina działa na porcie ${PORT}`);
-});
+http.listen(PORT, '0.0.0.0', () => console.log(`Serwer na porcie ${PORT}`));
