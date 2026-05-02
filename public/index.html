@@ -7,18 +7,52 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Fauna+One&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        /* Twoje poprzednie style z poprawkami kontrastu */
-        body { background: #050510; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center; }
-        #screen-main, #screen-night { min-height: 100vh; display: none; padding: 5vh 20px; }
-        h1 { font-family: 'Cinzel'; font-size: 3rem; color: #e94560; text-shadow: 0 0 20px rgba(233, 69, 96, 0.5); }
+        body { 
+            background: linear-gradient(rgba(10, 10, 25, 0.8), rgba(10, 10, 25, 0.8)), 
+                        url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1000') no-repeat center center fixed; 
+            background-size: cover;
+            color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center; 
+        }
+        
+        #screen-main, #screen-night { min-height: 100vh; display: none; padding: 5vh 20px; box-sizing: border-box; }
+        
+        h1 { font-family: 'Cinzel'; font-size: 3.5rem; color: #e94560; text-shadow: 0 0 20px rgba(233, 69, 96, 0.8); margin: 0 0 20px 0; }
+        
+        /* LISTA GRACZY - POPRAWIONA WIDOCZNOŚĆ */
+        .player-list-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #d4af37;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            min-height: 100px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        .player-tag {
+            background: #4a0000;
+            color: #f0e68c;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Cinzel';
+            border: 1px solid #f0e68c;
+            font-size: 1.2rem;
+        }
+
         .player-card { 
             background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png');
             color: #2b1e16; border: 8px double #4a3728; padding: 30px; border-radius: 20px;
             max-width: 360px; margin: 20px auto; box-shadow: 0 15px 40px rgba(0,0,0,0.7);
         }
         .dark-side { background-color: #1a0505 !important; color: #fff !important; border-color: #ff0000 !important; }
-        .dark-side .role-name { color: #ff4444 !important; }
-        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 20px 50px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; font-size: 1.2rem; }
+        button { 
+            background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; 
+            padding: 20px 50px; font-family: 'Cinzel'; border-radius: 50px; 
+            cursor: pointer; font-size: 1.3rem; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -28,25 +62,28 @@
         <div style="background: white; padding: 10px; display: inline-block; border-radius: 10px; margin: 20px;">
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://harrypottermafia.onrender.com" alt="QR">
         </div>
-        <div id="player-list" style="margin: 20px; font-size: 1.2rem;"></div>
+        <h2 style="font-family: 'Cinzel'">Czarodzieje w zamku:</h2>
+        <div id="player-list" class="player-list-box">Czekam na pierwszych graczy...</div>
         <button onclick="startIntrigue()">NIECH ROZPOCZNIE SIĘ INTRYGA</button>
     </div>
 
     <div id="screen-night">
-        <h1 style="color: #ff0000; font-size: 4rem;">🌙 NOC ZAPADŁA</h1>
-        <h2 style="font-family: 'Cinzel'">Śmierciożercy szykują Avada Kedavra...</h2>
-        <div id="night-players"></div>
+        <h1 style="color: #ff0000; font-size: 4.5rem;">🌙 NOC ZAPADŁA</h1>
+        <h2 style="font-family: 'Cinzel'; font-size: 2rem;">Wszyscy gracze zamykają oczy...</h2>
+        <div id="night-players" class="player-list-box"></div>
     </div>
 
-    <div id="screen-player">
-        <div id="join-section" style="padding: 40px;">
-            <input type="text" id="pName" placeholder="Twoje Imię..." style="padding: 15px; width: 80%; margin-bottom: 20px; border-radius: 10px;">
-            <button onclick="join()">DOŁĄCZ</button>
+    <div id="screen-player" style="display:none; padding: 40px;">
+        <div id="join-section">
+            <h2 style="font-family: 'Cinzel'">Podaj swoje imię</h2>
+            <input type="text" id="pName" placeholder="Imię..." style="padding: 15px; width: 80%; margin-bottom: 20px; border-radius: 10px; font-size: 1.2rem;">
+            <br>
+            <button onclick="join()">DOŁĄCZ DO GRY</button>
         </div>
         <div id="player-card" class="player-card" style="display:none;">
             <span style="font-size: 5rem;" id="r-icon"></span>
-            <h2 class="role-name" id="r-name"></h2>
-            <p id="r-desc" style="font-weight: bold;"></p>
+            <h2 id="r-name" style="font-family: 'Cinzel'; color: #4a0000;"></h2>
+            <p id="r-desc" style="font-weight: bold; line-height: 1.4;"></p>
         </div>
     </div>
 
@@ -58,7 +95,10 @@
 
         function join() {
             const n = document.getElementById('pName').value;
-            if(n) { socket.emit('join-game', n); document.getElementById('join-section').style.display = 'none'; }
+            if(n) { 
+                socket.emit('join-game', n); 
+                document.getElementById('join-section').style.display = 'none'; 
+            }
         }
 
         function startIntrigue() { socket.emit('start-intrigue'); }
@@ -73,15 +113,16 @@
         });
 
         socket.on('update-player-list', (players) => {
-            document.getElementById('player-list').innerHTML = players.map(p => `<span>${p.name}</span>`).join(" | ");
+            const content = players.map(p => `<div class="player-tag">${p.name}</div>`).join("");
+            document.getElementById('player-list').innerHTML = content;
+            document.getElementById('night-players').innerHTML = content;
         });
 
         socket.on('transition-to-night', () => {
-            // Klimatyczny głos
-            const msg = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Noc zapadła nad Hogwartem. Śmierciożercy, szykujcie różdżki do Avada Kedavra.");
+            const msg = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Zapada noc nad Hogwartem. Niech wszyscy gracze zamkną oczy.");
             msg.lang = 'pl-PL';
-            msg.pitch = 0.6; // Niższy głos
-            msg.rate = 0.8;  // Wolniejszy głos
+            msg.pitch = 0.5;
+            msg.rate = 0.7;
             window.speechSynthesis.speak(msg);
 
             if(!isMobile) {
