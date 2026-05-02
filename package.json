@@ -1,18 +1,14 @@
 {
-  "name": "harrypottermafia",
+  "name": "hogwarts-mafia",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "description": "Gra Potyczka w Hogwarcie - Studio Skawina",
+  "main": "server.js",
   "dependencies": {
-    "express": "^5.2.1",
-    "qrcode": "^1.5.4",
-    "socket.io": "^4.8.3"
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "axios": "^1.6.0"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }
