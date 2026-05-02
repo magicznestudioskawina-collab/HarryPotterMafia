@@ -2,90 +2,89 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Hogwarts Mafia - Studio Skawina</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Potyczka w Hogwarcie - Studio Skawina</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Fauna+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        * { box-sizing: border-box; }
         body { 
-            background: linear-gradient(rgba(10, 10, 25, 0.95), rgba(10, 10, 25, 0.95)), 
-                        url('https://images.unsplash.com/photo-1506466010722-395aa2bef877?q=80&w=1000') no-repeat center center fixed; 
-            background-size: cover; color: #f0e68c; font-family: 'Fauna One', serif; 
-            text-align: center; margin: 0; padding: 0; height: 100vh;
-            display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
+            background: #0a0a19; color: #f0e68c; font-family: 'Fauna One', serif; 
+            margin: 0; text-align: center; overflow-x: hidden;
         }
-        header { padding: 15px 0; }
-        .card-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 15px; }
-        .card { 
-            background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png');
-            border: 5px double #4a3728; width: 100%; max-width: 340px; border-radius: 15px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: #2b1e16; padding: 25px;
+        .main-screen { padding: 40px; display: none; }
+        .player-screen { padding: 20px; display: none; }
+        h1 { font-family: 'Cinzel'; font-size: 3rem; color: #e94560; }
+        .qr-area { background: white; padding: 20px; display: inline-block; border-radius: 10px; margin: 20px; }
+        .player-card { 
+            background: #f4e4bc; color: #2b1e16; border: 5px double #4a3728;
+            padding: 30px; border-radius: 15px; max-width: 350px; margin: 20px auto;
         }
-        .dark-side { background-color: #1a0505 !important; color: #ffffff !important; border-color: #ff0000 !important; }
-        .dark-side #role-name { color: #ff4444 !important; }
-        footer { padding-bottom: 50px; }
-        button { 
-            background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; 
-            padding: 16px 0; border-radius: 35px; cursor: pointer; 
-            font-family: 'Cinzel', serif; font-size: 1.1rem; width: 85%; max-width: 280px;
+        .btn-start { 
+            background: #4a0000; color: #f0e68c; border: 2px solid #d4af37;
+            padding: 20px 50px; font-family: 'Cinzel'; font-size: 1.5rem; cursor: pointer;
         }
-        #night-overlay { display: none; color: #ff4444; font-family: 'Cinzel'; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <header><h1>Hogwarts Mafia</h1></header>
-    <div class="card-container">
-        <div class="card" id="mainCard">
-            <div id="status-text">⏳ Oczekiwanie na start...</div>
-            <div id="role-display" style="display:none;">
-                <span id="role-icon" style="font-size: 4rem;">❓</span>
-                <h2 id="role-name" style="font-family:'Cinzel';">Rola</h2>
-                <p id="role-desc">Opis...</p>
-                <div id="night-overlay">🌙 NOC ZAPADŁA...</div>
-            </div>
+
+    <!-- EKRAN GŁÓWNY (KOMPUTER) -->
+    <div id="screen-main" class="main-screen">
+        <h1>Witaj w grze: Potyczka w Hogwarcie</h1>
+        <div class="qr-area" id="qrcode">
+            <!-- Tutaj wstaw obrazek kodu QR który wygenerowałeś wcześniej -->
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://harrypottermafia.onrender.com" alt="QR Code">
+        </div>
+        <h3>Dołączyli czarodzieje:</h3>
+        <div id="player-list" style="font-size: 1.5rem; margin-bottom: 30px;">Czekam na graczy...</div>
+        <button class="btn-start" onclick="startIntrigue()">ROZPOCZNIJ INTRYGĘ</button>
+    </div>
+
+    <!-- EKRAN GRACZA (TELEFON) -->
+    <div id="screen-player" class="player-screen">
+        <div id="join-form">
+            <h2>Wpisz swoje imię:</h2>
+            <input type="text" id="playerName" style="padding: 10px; font-size: 1.2rem;"><br><br>
+            <button class="btn-start" onclick="joinGame()">WEJDŹ DO GRY</button>
+        </div>
+        <div id="role-card" class="player-card" style="display:none;">
+            <h2 id="r-name">Twoja Rola</h2>
+            <p id="r-desc">Opis...</p>
         </div>
     </div>
-    <footer id="game-footer">
-        <button id="startBtn" onclick="pressStart()">ROZPOCZNIJ NOC</button>
-    </footer>
 
-    <audio id="magicSound" src="https://www.soundjay.com/magic/sounds/magic-chime-01.mp3"></audio>
+    <audio id="introVoice" src="https://api.elevenlabs.io/v1/text-to-speech/cyrillic_voice_id/stream"></audio>
 
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
         const socket = io();
-        const roleData = {
-            'Harry Potter (Auror)': { icon: '⚡', desc: 'Sprawdź lojalność jednego gracza.' },
-            'Ron Weasley (Straznik)': { icon: '🍗', desc: 'Wybierz gracza do ochrony.' },
-            'Smierciozerca (Mafia)': { icon: '💀', desc: 'Wyeliminujcie czarodziejów.' },
-            'Lord Voldemort (Lider Mafii)': { icon: '🐍', desc: 'Jesteś niewykrywalny dla Harry’ego.' },
-            'Uczeń Hogwartu': { icon: '🏰', desc: 'Głosuj i przetrwaj.' }
-        };
+        const isMobile = /iPhone|Android/i.test(navigator.userAgent);
 
-        function pressStart() {
-            document.getElementById('magicSound').play();
-            socket.emit('start-game');
+        if (isMobile) {
+            document.getElementById('screen-player').style.display = 'block';
+        } else {
+            document.getElementById('screen-main').style.display = 'block';
         }
 
-        socket.on('assign-role', (role) => {
-            document.getElementById('status-text').style.display = 'none';
-            document.getElementById('role-display').style.display = 'block';
-            document.getElementById('startBtn').style.display = 'none'; // Przycisk znika po starcie
-            
-            const data = roleData[role] || { icon: '✨', desc: 'Los nieznany.' };
-            document.getElementById('role-icon').innerText = data.icon;
-            document.getElementById('role-name').innerText = role;
-            document.getElementById('role-desc').innerText = data.desc;
+        function joinGame() {
+            const name = document.getElementById('playerName').value;
+            socket.emit('join-game', name);
+            document.getElementById('join-form').style.display = 'none';
+        }
 
-            if(role.includes('Mafia') || role.includes('Voldemort')) {
-                document.getElementById('mainCard').classList.add('dark-side');
-            }
+        function startIntrigue() {
+            socket.emit('start-intrigue');
+            const msg = new SpeechSynthesisUtterance("Niech rozpocznie się intryga!");
+            msg.lang = 'pl-PL';
+            window.speechSynthesis.speak(msg);
+        }
+
+        socket.on('assign-role', (player) => {
+            document.getElementById('role-card').style.display = 'block';
+            document.getElementById('r-name').innerText = player.role;
+            // Tutaj możesz dodać resztę opisów ról...
         });
 
-        socket.on('night-started', () => {
-            document.getElementById('night-overlay').style.display = 'block';
-            // Tutaj możesz dodać wibrację telefonu
-            if (navigator.vibrate) navigator.vibrate(200);
+        socket.on('update-player-list', (players) => {
+            document.getElementById('player-list').innerText = players.map(p => p.name).join(", ");
         });
     </script>
 </body>
