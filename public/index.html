@@ -8,20 +8,20 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         body { 
-            background: linear-gradient(rgba(10, 10, 25, 0.85), rgba(10, 10, 25, 0.85)), 
-                        url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1000') no-repeat center center fixed; 
+            background: linear-gradient(rgba(10, 10, 25, 0.9), rgba(10, 10, 25, 0.9)), 
+                        url('https://images.unsplash.com/photo-1547756536-cde3673fa2e5?q=80&w=1000') no-repeat center center fixed; 
             background-size: cover; color: #f0e68c; font-family: 'Fauna One', serif; margin: 0; text-align: center;
         }
         .screen { min-height: 100vh; display: none; padding: 20px; box-sizing: border-box; }
-        h1 { font-family: 'Cinzel'; font-size: 2.8rem; color: #e94560; text-shadow: 0 0 15px #e94560; margin: 10px 0; }
-        .box { background: rgba(0,0,0,0.85); border: 2px solid #d4af37; padding: 25px; border-radius: 20px; max-width: 500px; margin: auto; }
-        .player-tag { background: #4a0000; padding: 8px 18px; border-radius: 25px; margin: 5px; display: inline-block; font-family: 'Cinzel'; border: 1px solid #d4af37; font-size: 1.1rem; }
-        .player-card { background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png'); color: #2b1e16; border: 8px double #4a3728; padding: 30px; border-radius: 20px; max-width: 360px; margin: 20px auto; box-shadow: 0 15px 35px rgba(0,0,0,0.7); }
+        h1 { font-family: 'Cinzel'; font-size: 2.8rem; color: #e94560; text-shadow: 0 0 15px #e94560; }
+        .box { background: rgba(0,0,0,0.85); border: 2px solid #d4af37; padding: 25px; border-radius: 20px; max-width: 600px; margin: auto; }
+        .player-tag { background: #4a0000; padding: 8px 18px; border-radius: 25px; margin: 5px; display: inline-block; font-family: 'Cinzel'; border: 1px solid #d4af37; }
+        .player-card { background: #f4e4bc url('https://www.transparenttextures.com/patterns/old-paper.png'); color: #2b1e16; border: 8px double #4a3728; padding: 30px; border-radius: 20px; max-width: 360px; margin: 20px auto; }
         .dark-side { background-color: #1a0505 !important; color: #fff !important; border-color: #ff0000 !important; }
-        .dark-side h2 { color: #ff4444 !important; }
-        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 15px 35px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
-        button:hover { transform: scale(1.05); background: #600000; }
-        input { padding: 12px; border-radius: 10px; border: none; font-size: 1.1rem; text-align: center; width: 80%; }
+        .mafia-list { margin-top: 15px; padding: 10px; border-top: 2px dashed #ff0000; color: #ff4444; font-size: 0.9rem; font-weight: bold; }
+        button { background: #4a0000; color: #f0e68c; border: 2px solid #d4af37; padding: 15px 35px; font-family: 'Cinzel'; border-radius: 50px; cursor: pointer; }
+        #night-msg { font-size: 2.5rem; color: #ff0000; font-family: 'Cinzel'; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
     </style>
 </head>
 <body>
@@ -30,9 +30,9 @@
         <h1>Magiczne Studio Skawina</h1>
         <div class="box">
             <h2>Ilu czarodziejów zagra?</h2>
-            <input type="number" id="cInput" value="10" min="10">
+            <input type="number" id="cInput" value="10" min="10" style="padding:10px; border-radius:10px; text-align:center;">
             <br><br>
-            <button onclick="initGame()">PRZYGOTUJ POTYCZKĘ</button>
+            <button onclick="initGame()">PRZYGOTUJ MAGIĘ</button>
         </div>
     </div>
 
@@ -45,21 +45,27 @@
     </div>
 
     <div id="screen-night" class="screen">
-        <h1 style="color:#ff0000; font-size:4.5rem; margin-top: 10vh;">🌙 NOC ZAPADŁA</h1>
-        <h2 style="font-family:'Cinzel'; font-size: 2rem;">Śmierciożercy szykują różdżki...</h2>
+        <h1 id="night-msg">🌙 NOC ZAPADŁA</h1>
+        <div class="box" id="mafia-reveal-msg" style="display:none; margin-top: 5vh;">
+            <h2 style="color: #ff0000; font-family: 'Cinzel';">Śmierciożercy otwierają oczy...</h2>
+            <p style="font-size: 1.5rem;">Mafia się poznaje. Reszta czarodziejów trwa w mroku.</p>
+        </div>
     </div>
 
-    <div id="screen-player" class="screen" style="padding-top: 40px;">
+    <div id="screen-player" class="screen">
         <div id="j-sec">
             <h1>Potyczka w Hogwarcie</h1>
-            <input type="text" id="nameInp" placeholder="Twoje imię...">
+            <input type="text" id="nameInp" placeholder="Twoje imię..." style="padding:15px; width:80%; border-radius:10px;">
             <br><br>
-            <button onclick="join()">DOŁĄCZ DO GRY</button>
+            <button onclick="join()">DOŁĄCZ</button>
         </div>
         <div id="p-card" class="player-card" style="display:none;">
-            <span id="p-icon" style="font-size:5.5rem;"></span>
-            <h2 id="p-role" style="font-family:'Cinzel'; font-size: 2rem; margin: 10px 0;"></h2>
-            <p id="p-desc" style="font-weight:bold; line-height: 1.5; font-size: 1.1rem;"></p>
+            <span id="p-icon" style="font-size:5rem;"></span>
+            <h2 id="p-role" style="font-family:'Cinzel';"></h2>
+            <p id="p-desc" style="font-weight:bold;"></p>
+            <div id="p-mafia-info" class="mafia-list" style="display:none;">
+                TWOI SOJUSZNICY: <br> <span id="mafia-names"></span>
+            </div>
         </div>
     </div>
 
@@ -68,10 +74,8 @@
         const mobile = /iPhone|Android/i.test(navigator.userAgent);
         document.getElementById(mobile ? 'screen-player' : 'screen-setup').style.display = 'block';
 
-        function initGame() {
-            socket.emit('set-game-config', { count: document.getElementById('cInput').value });
-        }
-
+        function initGame() { socket.emit('set-game-config', { count: document.getElementById('cInput').value }); }
+        
         socket.on('game-ready', (data) => {
             document.getElementById('screen-setup').style.display = 'none';
             document.getElementById('screen-main').style.display = 'block';
@@ -95,6 +99,11 @@
             if(p.role.match(/Voldemort|Smierciozerca|Bellatrix/)) card.classList.add('dark-side');
         });
 
+        socket.on('reveal-mafia', (names) => {
+            document.getElementById('p-mafia-info').style.display = 'block';
+            document.getElementById('mafia-names').innerText = names;
+        });
+
         socket.on('update-player-list', (d) => {
             document.getElementById('count-label').innerText = `Dołączyli: ${d.players.length} / ${d.target}`;
             document.getElementById('p-list').innerHTML = d.players.map(p => `<div class="player-tag">${p.name}</div>`).join("");
@@ -104,12 +113,13 @@
         function start() { socket.emit('start-intrigue'); }
 
         socket.on('transition-to-night', () => {
-            const utter = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Zapada noc nad Hogwartem. Niech wszyscy gracze zamkną oczy.");
+            const utter = new SpeechSynthesisUtterance("Niech rozpocznie się intryga! Zapada noc nad Hogwartem. Niech wszyscy gracze zamkną oczy. Śmierciożercy otwierają oczy i poznają się nawzajem.");
             utter.lang = 'pl-PL'; utter.pitch = 0.5; utter.rate = 0.7;
             window.speechSynthesis.speak(utter);
             if(!mobile) {
                 document.getElementById('screen-main').style.display = 'none';
                 document.getElementById('screen-night').style.display = 'block';
+                setTimeout(() => { document.getElementById('mafia-reveal-msg').style.display = 'block'; }, 2000);
             }
         });
     </script>
